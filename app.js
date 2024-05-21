@@ -38,6 +38,33 @@ const cep =[
     "siafi": "9241"
   }
 ]
+const cursos=[
+"Eletricista de Manutenção Industrial",
+"Mecânico de Usinagem",
+"Técnico em Automação Industrial",
+"Soldador de Estruturas Metálicas",
+"Técnico em Eletroeletrônica",
+"Operador de Máquinas CNC",
+"Técnico em Logística",
+"Programador de Computador",
+"Desenhista Técnico Mecânico",
+"Técnico em Segurança do Trabalho"
+]
+
+
+const alunos=[
+"Ana Silva",
+"Carlos Oliveira",
+"Marina Santos",
+"Rafaela Costa",
+"Pedro Almeida"
+]
+const matricula = [
+    {"idaluno":"2","idcurso":"6"},
+    {"idaluno":"4","idcurso":"5"},
+    {"idaluno":"1","idcurso":"3"}
+]
+
 const usuario=[
     {nome:'carlos', idade:'20',peso:'100'},
     {nome:'pedro', idade:'30'},
@@ -48,6 +75,30 @@ app.use("/todos",(req, res, next)=>{
 })
 app.use("/nome",(req, res, next)=>{
     res.send(usuario[1].nome)
+})
+app.use("/matricula/:id",(req, res, next)=>{
+    const id =req.params.id
+   
+    const nome = alunos[id]
+    const matriculado = matricula.filter(linha=>
+        linha.idaluno==id)
+
+    const nomecurso=cursos[matriculado[0].idcurso];
+    function findByKey(key, value) {
+        return (item, i) => item[key] === value
+    }
+        let findParams = findByKey('idcurso',
+        matriculado[0].idcurso )
+        let index = matricula.findIndex(findParams)
+   const resposta = {
+        idaluno:id,
+        nomedoaluno: nome,
+        idmatricula: index,
+        idcurso :matriculado[0].idcurso,
+        cursomatriculado: nomecurso,
+        mensagem:"Dados da Matrícula"
+   }
+    res.send(resposta)
 })
 app.use("/cep/:valor",(req, res, next)=>{
     const valor=req.params.valor
@@ -76,16 +127,7 @@ app.use("/cep/:valor",(req, res, next)=>{
                     })
     })
 
-const alunos=[
-    "ana silva",
-    "carlos silva"
-]
-alunos[1]
-const mat={'idaluno':'1','idcurso':'3'}
-const matricula=[
-    {'idaluno':'1','idcurso':'3'},
-    {"idaluno":'3', "idcurso:":"5"}
-]
+
 
 app.use("/soma",(req, res, next)=>{
     let total=0;
@@ -97,3 +139,5 @@ app.use("/soma",(req, res, next)=>{
     res.send("Soma total: "+total);
 })
 module.exports = app
+
+
