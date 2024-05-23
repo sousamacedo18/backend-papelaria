@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const usuarios=["joao", "pedro"]
 const usuario=[
 {
     id:1,
@@ -13,25 +13,19 @@ const usuario=[
 ]
 //consultar todos os dados
 router.get("/",(req,res,next)=>{
-    console.log(usuario)
-   res.send(
-    {
-        mensagem:"lista de usuários",
-        usuarios:usuario
-    }
-   )
+ const resultado =    
+            {
+                mensagem:"lista de usuários",
+                usuarios:usuario
+            }
+//quero apresentar o nome do joão
+res.send()
 })
-
-
-
-
-
-
 
 // aqui salvamos dados do usuário
 router.post("/",(req,res,next)=>{
 
-
+ 
 });
 
 // aqui podemos alterar dados do usuário
