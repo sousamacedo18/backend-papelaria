@@ -16,17 +16,7 @@ db.run(`CREATE TABLE IF NOT EXISTS
     }
 });
 
-const usuarios=["joao", "pedro"]
-const usuario=[
-{
-    id:1,
-    nome:"Joao"
-},
-{
-    id:2,
-    nome:"pedro"
-},
-]
+
 //consultar todos os dados
 router.get("/",(req,res,next)=>{
     db.all('SELECT * FROM usuario', (error, rows) => {
@@ -39,6 +29,22 @@ router.get("/",(req,res,next)=>{
         res.status(200).send({
             mensagem: "Aqui está a lista de todos os Usuarios",
             usuarios: rows
+        });
+    });
+})
+//consultar apenas um usuario pelo id
+router.get("/:id",(req,res,next)=>{
+    const {id} = req.params;
+    db.get('SELECT * FROM usuario', (error, rows) => {
+        if (error) {
+            return res.status(500).send({
+                error: error.message
+            });
+        }
+
+        res.status(200).send({
+            mensagem: "Aqui está o cadastro do Usuario",
+            usuario: rows
         });
     });
 })
