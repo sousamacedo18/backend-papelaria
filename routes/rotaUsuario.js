@@ -32,6 +32,26 @@ router.get("/",(req,res,next)=>{
         });
     });
 })
+router.get("/login",(req,res,next)=>{
+    const {email,senha} = req.body;
+    db.get('SELECT * FROM usuario where email=? and senha=?',[email,senha], (error, rows) => {
+        if (error) {
+            return res.status(500).send(
+                {
+                error: error.message,
+                
+                }
+            );
+        }
+
+        res.status(200).send(
+            {
+            mensagem: "Usuário logado com sucesso!!!",
+            usuarios: rows
+        }
+        );
+    });
+})
 //consultar apenas um usuario pelo id
 router.get("/:id",(req,res,next)=>{
     const {id} = req.params;
@@ -72,14 +92,36 @@ router.post("/",(req,res,next)=>{
 
 // aqui podemos alterar dados do usuário
 router.put("/",(req,res,next)=>{
-
+    const {id,nome,email,senha} = req.body;
+                db.run(`UPDATE usuario SET 
+                            nome=?,
+                            email=?,
+                            senha=?  
+            where id=?`,[nome,email,senha,id], (error, rows) => {
+        if (error) {
+            return res.status(500).send({
+                error: error.message
+            });
+        }
+        res.status(200).send(
+            { mensagem: "Usuário de id: "+id+" dados alterados com sucesso!" 
+            });
+    });
 });
  // Aqui podemos deletar o cadastro de um usuário por meio do id
 router.delete("/:id",(req,res,next)=>{
-    
-res.status(200).send(
-    { mensagem: "Usuário deletado com sucesso!" 
-});
+    const {id} = req.params
+    db.run('DELETE FROM usuario where id=?',[id], (error, rows) => {
+        if (error) {
+            return res.status(500).send({
+                error: error.message
+            });
+        }
+        res.status(200).send(
+            { mensagem: "Usuário de id: "+id+" deletado com sucesso!" 
+            });
+    });
+
 
 });
 module.exports = router;
