@@ -32,9 +32,12 @@ router.get("/",(req,res,next)=>{
         });
     });
 })
-router.get("/login",(req,res,next)=>{
+router.post("/login",(req,res,next)=>{
     const {email,senha} = req.body;
-    db.get('SELECT * FROM usuario where email=? and senha=?',[email,senha], (error, rows) => {
+    
+    db.get(`SELECT * FROM usuario 
+      where email=? and senha=?`,
+            [email,senha], (error, rows) => {
         if (error) {
             return res.status(500).send(
                 {
@@ -43,11 +46,16 @@ router.get("/login",(req,res,next)=>{
                 }
             );
         }
-
+        const usuario = {
+            id:rows.id,
+            nome:rows.nome,
+            email:rows.email
+          
+        } 
         res.status(200).send(
             {
             mensagem: "Usuário logado com sucesso!!!",
-            usuarios: rows
+            usuarios: usuario
         }
         );
     });
