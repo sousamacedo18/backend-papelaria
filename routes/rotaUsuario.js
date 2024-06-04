@@ -46,6 +46,7 @@ router.post("/login",(req,res,next)=>{
                 }
             );
         }
+        
         const usuario = {
             id:rows.id,
             nome:rows.nome,
