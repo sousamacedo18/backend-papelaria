@@ -23,8 +23,16 @@ app.use((req,res,next)=>{
     next();
 })
 const rotaUsuario = require("./routes/rotaUsuario");
+const rotaProduto = require('./routes/rotaProduto');
+const rotaEstoque = require('./routes/rotaEstoque');
+const rotaEntrada = require('./routes/rotaEntrada');
+const rotaSaida = require('./routes/rotaSaida')
 
-app.use("/usuario",rotaUsuario)
+app.use("/usuario",rotaUsuario);
+app.use("/produto", rotaProduto);
+app.use("/estoque",rotaEstoque);
+app.use("/entrada",rotaEntrada);
+app.use("/saida",rotaSaida);
 
 module.exports = app
 

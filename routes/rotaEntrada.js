@@ -30,7 +30,7 @@ db.all('SELECT * FROM entrada', (error, rows) => {
 
         res.status(200).send({
             mensagem: "Aqui está a lista de todass as Entradas",
-            produtos: rows
+            entradas: rows
         });
     });
 })
@@ -47,7 +47,7 @@ router.get("/:id",(req,res,next)=>{
 
         res.status(200).send({
             mensagem: "Aqui está o cadastro da Entrada",
-            produto: rows
+            entrada: rows
         });
     });
 })
@@ -62,7 +62,12 @@ router.post("/",(req,res,next)=>{
         VALUES(?,?,?,?)`);
         insertEntrada.run(id_produto, quantidade, valor_unitario,data_entrada);
         insertEntrada.finalize();
+        
+        
     });
+
+ atualizarestoque(id_produto,quantidade,valor_unitario);
+
     process.on("SIGINT", () => {
         db.close((err) => {
             if (err) {
@@ -71,10 +76,48 @@ router.post("/",(req,res,next)=>{
         });
     });
 
+        
     res.status(200)
     .send({ mensagem: "Entrada salvo com sucesso!" });
 });
+function atualizarestoque(id_produto,quantidade,valor_unitario){
+    db.get('SELECT * FROM estoque where id_produto=?',[id_produto], (error, rows) => {
+        if (error) {
+            return res.status(500).send({
+                error: error.message
+            });
+        }
+      if(rows.length>0){
+        // atualizar a quantidade no estoque 1
+        // acrescentando a quantidade inserida em entrada 1
+        const quantidadeestoque=rows[0].quantidade;
+        const quantidadeatualizada=parseFloat(quantidade)+parseFloat(quantidadeestoque);
+        db.serialize(() => {
+            //const total = quantidade*valor_unitario
+            const updateEstoque = db.prepare(`
+            UPDATE estoque SET  quantidade=?, valor_unitario=? Where id_produto=?`);
+            updateEstoque.run(quantidadeatualizada, valor_unitario, id_produto);
+            updateEstoque.finalize();
+            
+            
+        });
+        
+      }else{
+        //insira a mesma quantidade inserida em entrada
+        db.serialize(() => {
+            //const total = quantidade*valor_unitario
+            const insertEstoque = db.prepare(`
+            INSERT INTO estoque(id_produto, quantidade, valor_unitario) 
+            VALUES(?,?,?)`);
+            insertEstoque.run(id_produto, quantidade, valor_unitario);
+            insertEstoque.finalize();
+            
+            
+        });
+      }
 
+    });
+}
 // aqui podemos alterar dados da entrada
 router.put("/",(req,res,next)=>{
     const {id,id_produto, quantidade, valor_unitario,data_entrada} = req.body;
