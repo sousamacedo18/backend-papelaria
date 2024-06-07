@@ -101,7 +101,7 @@ function atualizarestoque(id_produto,quantidade,valor_unitario){
         // acrescentando a quantidade inserida em entrada 1
         const quantidadeestoque=rows.quantidade;
 
-        const quantidadeatualizada=parseFloat(quantidade)+parseFloat(quantidadeestoque);
+        const quantidadeatualizada=parseFloat(quantidade+quantidadeestoque);
         db.serialize(() => {
             //const total = quantidade*valor_unitario
             const updateEstoque = db.prepare(`

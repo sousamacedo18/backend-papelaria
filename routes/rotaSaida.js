@@ -30,12 +30,12 @@ db.all('SELECT * FROM saida', (error, rows) => {
 
         res.status(200).send({
             mensagem: "Aqui está a lista de todas as Saídas",
-            produtos: rows
+            saidas: rows
         });
     });
 })
 
-//consultar apenas uma entrada pelo id
+//consultar apenas uma saída pelo id
 router.get("/:id",(req,res,next)=>{
     const {id} = req.params;
     db.get('SELECT * FROM saida where id=?',[id], (error, rows) => {
@@ -47,12 +47,15 @@ router.get("/:id",(req,res,next)=>{
 
         res.status(200).send({
             mensagem: "Aqui está o cadastro da Saída",
-            produto: rows
+            saida: rows
         });
     });
 })
 
-// aqui salvamos dados da entrada
+
+
+
+// aqui salvamos dados da Saída
 router.post("/",(req,res,next)=>{
     const { id_produto, quantidade, valor_unitario, data_saida }
      = req.body;
@@ -62,7 +65,10 @@ router.post("/",(req,res,next)=>{
         VALUES(?,?,?,?)`);
         insertSaida.run(id_produto, quantidade, valor_unitario,data_saida);
         insertSaida.finalize();
-    });
+});
+
+            atualizarestoque(id_produto,quantidade);
+
     process.on("SIGINT", () => {
         db.close((err) => {
             if (err) {
@@ -71,19 +77,64 @@ router.post("/",(req,res,next)=>{
         });
     });
 
+        
     res.status(200)
-    .send({ mensagem: "Saída salvo com sucesso!" });
+    .send({ mensagem: "Entrada salvo com sucesso!" });
 });
 
-// aqui podemos alterar dados da entrada
+
+
+
+function atualizarestoque(id_produto,quantidade){
+   
+    db.get('SELECT * FROM estoque where id_produto=?',
+    [id_produto], (error, rows) => {
+        if (error) {
+            return res.status(500).send({
+                error: error.message
+            });
+        }
+      
+      if(rows){
+        
+        // atualizar a quantidade no estoque 1
+        // acrescentando a quantidade inserida em entrada 1
+        const quantidadeestoque=rows.quantidade;
+         if (quantidadeestoque<quantidade || quantidadeestoque===0){
+                 return res.status(404).send({
+                  mensagem: "Quantidade é menor que a quantidade no estoque"
+                    });
+        }
+        const quantidadeatualizada=parseFloat(quantidadeestoque-quantidade);
+        db.serialize(() => {
+            //const total = quantidade*valor_unitario
+            const updateEstoque = db.prepare(`
+            UPDATE estoque SET  quantidade=? Where id_produto=?`);
+            updateEstoque.run(quantidadeatualizada, id_produto);
+            updateEstoque.finalize();
+            
+            
+        });
+        
+      }else{
+        //produto nao encontrado
+        return res.status(404).send({
+            mensagem: "Produto nao foi encontrado no estoque"
+        });
+      }
+
+    });
+}
+// aqui podemos alterar dados da saida
 router.put("/",(req,res,next)=>{
     const {id,id_produto, quantidade, valor_unitario,data_saida} = req.body;
-                db.run(`UPDATE saida SET 
+                db.run(`UPDATE entrada SET 
                             id_produto=?,
                             quantidade=?,
                             valor_unitario=?,
                             data_saida=?  
-            where id=?`,[id_produto,quantidade,valor_unitario,data_saida,id], (error, rows) => {
+            where id=?`,[id_produto,quantidade,valor_unitario,data_saida,id], 
+            (error, rows) => {
         if (error) {
             return res.status(500).send({
                 error: error.message
@@ -94,7 +145,7 @@ router.put("/",(req,res,next)=>{
             });
     });
 });
- // Aqui podemos deletar o cadastro de um usuário por meio do id
+ // Aqui podemos deletar o cadastro de um saída por meio do id
 router.delete("/:id",(req,res,next)=>{
     const {id} = req.params
     db.run('DELETE FROM saida where id=?',[id], (error, rows) => {
@@ -104,7 +155,7 @@ router.delete("/:id",(req,res,next)=>{
             });
         }
         res.status(200).send(
-            { mensagem: "Entrada deletada com sucesso!" 
+            { mensagem: "Saída deletada com sucesso!" 
             });
     });
 
