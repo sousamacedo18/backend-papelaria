@@ -52,6 +52,9 @@ router.get("/:id",(req,res,next)=>{
     });
 })
 
+
+
+
 // aqui salvamos dados da entrada
 router.post("/",(req,res,next)=>{
     const { id_produto, quantidade, valor_unitario, data_entrada }
@@ -62,11 +65,9 @@ router.post("/",(req,res,next)=>{
         VALUES(?,?,?,?)`);
         insertEntrada.run(id_produto, quantidade, valor_unitario,data_entrada);
         insertEntrada.finalize();
-        
-        
-    });
+});
 
- atualizarestoque(id_produto,quantidade,valor_unitario);
+            atualizarestoque(id_produto,quantidade,valor_unitario);
 
     process.on("SIGINT", () => {
         db.close((err) => {
@@ -80,17 +81,26 @@ router.post("/",(req,res,next)=>{
     res.status(200)
     .send({ mensagem: "Entrada salvo com sucesso!" });
 });
+
+
+
+
 function atualizarestoque(id_produto,quantidade,valor_unitario){
-    db.get('SELECT * FROM estoque where id_produto=?',[id_produto], (error, rows) => {
+   
+    db.get('SELECT * FROM estoque where id_produto=?',
+    [id_produto], (error, rows) => {
         if (error) {
             return res.status(500).send({
                 error: error.message
             });
         }
-      if(rows.length>0){
+      
+      if(rows){
+        
         // atualizar a quantidade no estoque 1
         // acrescentando a quantidade inserida em entrada 1
-        const quantidadeestoque=rows[0].quantidade;
+        const quantidadeestoque=rows.quantidade;
+
         const quantidadeatualizada=parseFloat(quantidade)+parseFloat(quantidadeestoque);
         db.serialize(() => {
             //const total = quantidade*valor_unitario
